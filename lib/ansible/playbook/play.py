@@ -69,6 +69,11 @@ class Play(Base, Taggable, Become):
     _hosts               = FieldAttribute(isa='list', required=True, listof=string_types, always_post_validate=True)
     _name                = FieldAttribute(isa='string', default='', always_post_validate=True)
 
+    # Facts gathering
+    _gather_facts        = FieldAttribute(isa='bool', default=None, always_post_validate=True)
+    _gather_subset       = FieldAttribute(isa='barelist', default=None, always_post_validate=True)
+    _gather_network_interfaces = FieldAttribute(isa='barelist', default=None, always_post_validate=True)
+
     # Variable Attributes
     _vars_files          = FieldAttribute(isa='list', default=[], priority=99)
     _vars_prompt         = FieldAttribute(isa='list', default=[], always_post_validate=True)
