@@ -37,14 +37,15 @@ from ansible.plugins import vars_loader
 from ansible.utils.unicode import to_unicode, to_bytes
 from ansible.utils.vars import combine_vars
 from ansible.parsing.utils.addresses import parse_address
-
-HOSTS_PATTERNS_CACHE = {}
+from ansible.utils.path import unfrackpath
 
 try:
     from __main__ import display
 except ImportError:
     from ansible.utils.display import Display
     display = Display()
+
+HOSTS_PATTERNS_CACHE = {}
 
 class Inventory(object):
     """
@@ -55,7 +56,7 @@ class Inventory(object):
 
         # the host file file, or script path, or list of hosts
         # if a list, inventory data will NOT be loaded
-        self.host_list = host_list
+        self.host_list = unfrackpath(host_list, follow=False)
         self._loader = loader
         self._variable_manager = variable_manager
         self.localhost = None

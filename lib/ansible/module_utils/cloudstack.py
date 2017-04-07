@@ -157,7 +157,17 @@ class AnsibleCloudStack(object):
                 continue
 
             if key in current_dict:
-                if isinstance(current_dict[key], (int, long, float, complex)):
+                if isinstance(value, (int, float, long, complex)):
+                    # ensure we compare the same type
+                    if isinstance(value, int):
+                        current_dict[key] = int(current_dict[key])
+                    elif isinstance(value, float):
+                        current_dict[key] = float(current_dict[key])
+                    elif isinstance(value, long):
+                        current_dict[key] = long(current_dict[key])
+                    elif isinstance(value, complex):
+                        current_dict[key] = complex(current_dict[key])
+
                     if value != current_dict[key]:
                         return True
                 else:
@@ -252,6 +262,9 @@ class AnsibleCloudStack(object):
 
         zone = self.module.params.get('zone')
         zones = self.cs.listZones()
+
+        if not zones:
+            self.module.fail_json(msg="No zones available. Please create a zone first")
 
         # use the first zone if no zone param given
         if not zone:

@@ -71,6 +71,7 @@ class TaskExecutor:
         self._shared_loader_obj = shared_loader_obj
         self._connection        = None
         self._rslt_q            = rslt_q
+        self._loop_eval_error   = None
 
     def run(self):
         '''
@@ -90,7 +91,13 @@ class TaskExecutor:
                 roledir = self._task._role._role_path
             self._job_vars['roledir'] = roledir
 
-            items = self._get_loop_items()
+            try:
+                items = self._get_loop_items()
+            except AnsibleUndefinedVariable as e:
+                # save the error raised here for use later
+                items = None
+                self._loop_eval_error = e
+
             if items is not None:
                 if len(items) > 0:
                     item_results = self._run_loop(items)
@@ -377,6 +384,11 @@ class TaskExecutor:
             if not self._task.evaluate_conditional(templar, variables):
                 display.debug("when evaluation failed, skipping this task")
                 return dict(changed=False, skipped=True, skip_reason='Conditional check failed', _ansible_no_log=self._play_context.no_log)
+            # since we're not skipping, if there was a loop evaluation error
+            # raised earlier we need to raise it now to halt the execution of
+            # this task
+            if self._loop_eval_error is not None:
+                raise self._loop_eval_error
         except AnsibleError:
             # skip conditional exception in the case of includes as the vars needed might not be avaiable except in the included tasks or due to tags
             if self._task.action != 'include':
@@ -409,7 +421,17 @@ class TaskExecutor:
         # get the connection and the handler for this execution
         if not self._connection or not getattr(self._connection, 'connected', False) or self._play_context.remote_addr != self._connection._play_context.remote_addr:
             self._connection = self._get_connection(variables=variables, templar=templar)
-            self._connection.set_host_overrides(host=self._host, hostvars=variables.get('hostvars', {}).get(self._host.name, {}))
+            hostvars = variables.get('hostvars', None)
+            if hostvars:
+                try:
+                    target_hostvars = hostvars.raw_get(self._host.name)
+                except:
+                    # FIXME: this should catch the j2undefined error here
+                    #        specifically instead of all exceptions
+                    target_hostvars = dict()
+            else:
+                target_hostvars = dict()
+            self._connection.set_host_overrides(host=self._host, hostvars=target_hostvars)
         else:
             # if connection is reused, its _play_context is no longer valid and needs
             # to be replaced with the one templated above, in case other data changed
