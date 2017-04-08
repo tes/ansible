@@ -159,6 +159,7 @@ class PlayIterator:
         # Default options to gather
         gather_subset = play_context.gather_subset
         gather_timeout = play_context.gather_timeout
+        gather_interfaces = play_context.gather_interfaces
         fact_path = play_context.fact_path
 
         # Retrieve subset to gather
@@ -167,6 +168,9 @@ class PlayIterator:
         # Retrieve timeout for gather
         if self._play.gather_timeout is not None:
             gather_timeout = self._play.gather_timeout
+        # Retrieve list of interfaces to gather
+        if self._play.gather_network_interfaces is not None:
+            gather_interfaces = self._play.gather_network_interfaces
         # Retrieve fact_path
         if self._play.fact_path is not None:
             fact_path = self._play.fact_path
@@ -178,6 +182,7 @@ class PlayIterator:
         setup_task.tags   = ['always']
         setup_task.args   = {
             'gather_subset': gather_subset,
+            'gather_network_interfaces': gather_interfaces,
         }
         if gather_timeout:
             setup_task.args['gather_timeout'] = gather_timeout

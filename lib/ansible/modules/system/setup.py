@@ -123,6 +123,7 @@ def main():
         argument_spec = dict(
             gather_subset=dict(default=["all"], required=False, type='list'),
             gather_timeout=dict(default=10, required=False, type='int'),
+            gather_network_interfaces=dict(default=None, required=False, type='list'),
             filter=dict(default="*", required=False),
             fact_path=dict(default='/etc/ansible/facts.d', required=False, type='path'),
         ),
