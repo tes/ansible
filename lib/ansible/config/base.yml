@@ -650,6 +650,16 @@ DEFAULT_GATHER_TIMEOUT:
   - {key: gather_timeout, section: defaults}
   type: integer
   yaml: {key: defaults.gather_timeout}
+DEFAULT_GATHER_NETWORK_INTERFACES:
+  name: Gather network interfaces limits
+  default: ''
+  description:
+    - Limit the interfaces the M(setup) task will execute against.
+  env: [{name: ANSIBLE_GATHER_NETWORK_INTERFACES}]
+  ini:
+  - {key: gather_network_interfaces, section: defaults}
+  type: list
+  yaml: {key: defaults.gather_network_interfaces}
 DEFAULT_HANDLER_INCLUDES_STATIC:
   name: Make handler M(include) static
   default: False

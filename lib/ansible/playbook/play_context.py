@@ -250,6 +250,7 @@ class PlayContext(Base):
     # Fact gathering settings
     _gather_subset = FieldAttribute(isa='string', default=C.DEFAULT_GATHER_SUBSET)
     _gather_timeout = FieldAttribute(isa='string', default=C.DEFAULT_GATHER_TIMEOUT)
+    _gather_interfaces = FieldAttribute(isa='string', default=C.DEFAULT_GATHER_NETWORK_INTERFACES)
     _fact_path = FieldAttribute(isa='string', default=C.DEFAULT_FACT_PATH)
 
     def __init__(self, play=None, options=None, passwords=None, connection_lockfd=None):

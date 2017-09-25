@@ -102,9 +102,10 @@ class GenericBsdIfconfigNetwork(Network):
 
         return interface['v4'], interface['v6']
 
-    def get_interfaces_info(self, ifconfig_path, ifconfig_options='-a'):
+    def get_interfaces_info(self, ifconfig_path, default_ipv4, default_ipv6, ifconfig_options='-a'):
         interfaces = {}
         current_if = {}
+        skip_current_if = False
         ips = dict(
             all_ipv4_addresses=[],
             all_ipv6_addresses=[],
@@ -117,12 +118,19 @@ class GenericBsdIfconfigNetwork(Network):
         for line in out.splitlines():
 
             if line:
+                if skip_current_if and not (re.match('^\S', line) and len(words) > 3):
+                    continue
+
                 words = line.split()
 
                 if words[0] == 'pass':
                     continue
                 elif re.match('^\S', line) and len(words) > 3:
+                    skip_current_if = False
                     current_if = self.parse_interface_line(words)
+                    if not self._include_interface(current_if['device'], default_ipv4, default_ipv6):
+                        skip_current_if = True
+                        continue
                     interfaces[current_if['device']] = current_if
                 elif words[0].startswith('options='):
                     self.parse_options_line(words, current_if, ips)

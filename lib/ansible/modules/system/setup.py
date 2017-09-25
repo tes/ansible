@@ -41,6 +41,11 @@ options:
             - "Set the default timeout in seconds for individual fact gathering"
         required: false
         default: 10
+    gather_network_interfaces:
+        version_added: "2.4"
+        description:
+            - "Limit the network interfaces the setup task should gather"
+        required: false
     filter:
         version_added: "1.1"
         description:
@@ -135,6 +140,7 @@ def main():
         argument_spec=dict(
             gather_subset=dict(default=["all"], required=False, type='list'),
             gather_timeout=dict(default=10, required=False, type='int'),
+            gather_network_interfaces=dict(default=None, required=False, type='list'),
             filter=dict(default="*", required=False),
             fact_path=dict(default='/etc/ansible/facts.d', required=False, type='path'),
         ),
@@ -143,6 +149,7 @@ def main():
 
     gather_subset = module.params['gather_subset']
     gather_timeout = module.params['gather_timeout']
+    gather_network_interfaces = module.params['gather_network_interfaces']
     filter_spec = module.params['filter']
 
     # TODO: this mimics existing behavior where gather_subset=["!all"] actually means
@@ -166,6 +173,7 @@ def main():
                                                 filter_spec=filter_spec,
                                                 gather_subset=gather_subset,
                                                 gather_timeout=gather_timeout,
+                                                gather_network_interfaces=gather_network_interfaces,
                                                 minimal_gather_subset=minimal_gather_subset)
 
     facts_dict = fact_collector.collect(module=module)

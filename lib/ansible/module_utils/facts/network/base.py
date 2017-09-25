@@ -39,6 +39,21 @@ class Network:
     def populate(self, collected_facts=None):
         return {}
 
+    def _include_interface(self, device_name, default_ipv4=dict(), default_ipv6=dict()):
+        interfaces_list = self.module.params.get('gather_network_interfaces', None)
+        # if no limits are set include all interfaces
+        if interfaces_list is None:
+            return True
+        # always include the default interfaces
+        if default_ipv4 and device_name == default_ipv4.get('interface', None):
+            return True
+        if default_ipv6 and device_name == default_ipv6.get('interface', None):
+            return True
+        # include all requested interfaces
+        for pat in interfaces_list:
+            if fnmatch.fnmatch(device_name, pat):
+                return True
+        return False
 
 class NetworkCollector(BaseFactCollector):
     # MAYBE: we could try to build this based on the arch specific implemementation of Network() or its kin

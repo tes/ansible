@@ -110,6 +110,8 @@ class LinuxNetwork(Network):
             if not os.path.isdir(path):
                 continue
             device = os.path.basename(path)
+            if not self._include_interface(device, default_ipv4, default_ipv6):
+                continue
             interfaces[device] = {'device': device}
             if os.path.exists(os.path.join(path, 'address')):
                 macaddress = get_file_content(os.path.join(path, 'address'), default='')
